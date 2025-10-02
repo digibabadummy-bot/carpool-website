@@ -1,36 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Login with Email</title>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <body>
-  <h2>Login with OTP</h2>
-  <input type="text" id="phone" placeholder="Enter phone number (e.g. +919876543210)">
-  <button onclick="sendOTP()">Send OTP</button>
+  <h2>Login with Email OTP</h2>
+
+  <!-- Email input -->
+  <input type="email" id="email" placeholder="Enter your email">
+  <button onclick="sendEmailOTP()">Send OTP</button>
+
   <br><br>
-  <input type="text" id="otp" placeholder="Enter OTP">
-  <button onclick="verifyOTP()">Verify OTP</button>
+  <!-- OTP input -->
+  <input type="text" id="otp" placeholder="Enter OTP from Email">
+  <button onclick="verifyEmailOTP()">Verify OTP</button>
 
   <script>
     const { createClient } = supabase;
-    const supabaseUrl = "https://vupinegpbzhhadkgkpgv.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1cGluZWdwYnpoaGFka2drcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzODA0MTcsImV4cCI6MjA3NDk1NjQxN30.3wxZ1_wXcJ7bmMO8sGrkjK-n2RW3g3WhrVi1ESvzgHg";
+    const supabaseUrl = "https://abc123xyz.supabase.co";   // replace with your Supabase URL
+    const supabaseKey = "eyJhbGciOi...";                   // replace with your Supabase anon key
     const db = createClient(supabaseUrl, supabaseKey);
 
-    async function sendOTP() {
-      const phone = document.getElementById("phone").value;
-      const { data, error } = await db.auth.signInWithOtp({ phone });
-      if (error) alert("Error: " + error.message);
-      else alert("OTP sent!");
+    let emailValue = "";
+
+    // Step 1: Send OTP
+    async function sendEmailOTP() {
+      emailValue = document.getElementById("email").value;
+      const { data, error } = await db.auth.signInWithOtp({ email: emailValue });
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("OTP sent to " + emailValue);
+      }
     }
 
-    async function verifyOTP() {
-      const phone = document.getElementById("phone").value;
+    // Step 2: Verify OTP
+    async function verifyEmailOTP() {
       const token = document.getElementById("otp").value;
-      const { data, error } = await db.auth.verifyOtp({ phone, token, type: 'sms' });
-      if (error) alert("Error: " + error.message);
-      else { alert("Logged in!"); window.location.href = "profile.html"; }
+
+      const { data, error } = await db.auth.verifyOtp({
+        email: emailValue,
+        token,
+        type: 'email'
+      });
+
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Logged in successfully!");
+        window.location.href = "profile.html";  // redirect to car registration
+      }
     }
   </script>
 </body>
