@@ -4,29 +4,68 @@
   <title>Add Trip</title>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
-<body>
+<body style="font-family: Arial; padding: 20px;">
   <h2>Add Trip</h2>
-  <input type="text" id="start_city" placeholder="Start City"><br>
-  <input type="text" id="end_city" placeholder="End City"><br>
-  <input type="number" id="price" placeholder="Price per Seat"><br>
-  <input type="number" id="seats" placeholder="Seats Available"><br>
-  <button onclick="addTrip()">Add</button>
+  <input type="text" id="start_city" placeholder="Start City"><br><br>
+  <input type="text" id="end_city" placeholder="End City"><br><br>
+  <input type="number" id="price" placeholder="Price per Seat"><br><br>
+  <input type="number" id="seats" placeholder="Seats Available"><br><br>
+  <button onclick="addTrip()">Add Trip</button>
+
+  <p id="status" style="color:red; margin-top:20px;"></p>
 
   <script>
     const { createClient } = supabase;
-    const supabaseUrl = "https://vupinegpbzhhadkgkpgv.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1cGluZWdwYnpoaGFka2drcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzODA0MTcsImV4cCI6MjA3NDk1NjQxN30.3wxZ1_wXcJ7bmMO8sGrkjK-n2RW3g3WhrVi1ESvzgHg";
+    const supabaseUrl = "https://vupinegpbzhhadkgkpgv.supabase.co"; // ✅ your real URL
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1cGluZWdwYnpoaGFka2drcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzODA0MTcsImV4cCI6MjA3NDk1NjQxN30.3wxZ1_wXcJ7bmMO8sGrkjK-n2RW3g3WhrVi1ESvzgHg"; 
     const db = createClient(supabaseUrl, supabaseKey);
 
     async function addTrip() {
-      const start_city = document.getElementById("start_city").value;
-      const end_city = document.getElementById("end_city").value;
-      const price = document.getElementById("price").value;
-      const seats = document.getElementById("seats").value;
-      const { data: user } = await db.auth.getUser();
-      if (!user.user) { alert("Login first"); return; }
-      const { error } = await db.from("trips").insert([{ user_id: user.user.id, car_id: null, start_city, end_city, price_per_seat: price, seats_available: seats }]);
-      if (error) alert(error.message); else alert("Trip Added!");
+      document.getElementById("status").innerText = "Submitting trip...";
+      try {
+        // ✅ Check if user logged in
+        const { data: userData, error: userError } = await db.auth.getUser();
+        console.log("User check:", userData, userError);
+
+        if (userError) {
+          document.getElementById("status").innerText = "Auth error: " + userError.message;
+          return;
+        }
+        if (!userData || !userData.user) {
+          document.getElementById("status").innerText = "You must login first!";
+          return;
+        }
+
+        // ✅ Collect input values
+        const start_city = document.getElementById("start_city").value.trim();
+        const end_city = document.getElementById("end_city").value.trim();
+        const price = parseInt(document.getElementById("price").value);
+        const seats = parseInt(document.getElementById("seats").value);
+
+        // ✅ Try inserting
+        const { data, error } = await db
+          .from("trips")
+          .insert([{ 
+            user_id: userData.user.id, 
+            car_id: null, 
+            start_city, 
+            end_city, 
+            price_per_seat: price, 
+            seats_available: seats 
+          }]);
+
+        if (error) {
+          console.error("Insert error:", error);
+          document.getElementById("status").innerText = "Insert failed: " + error.message;
+        } else {
+          console.log("Insert success:", data);
+          document.getElementById("status").style.color = "green";
+          document.getElementById("status").innerText = "Trip added successfully!";
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        document.getElementById("status").innerText = "Unexpected error: " + err.message;
+      }
     }
   </script>
 </body>
