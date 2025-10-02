@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register Car</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h2>Register Car</h2>
+  <input type="text" id="car_model" placeholder="Car Model"><br>
+  <input type="text" id="car_number" placeholder="Car Number"><br>
+  <input type="number" id="seats" placeholder="Seats"><br>
+  <button onclick="registerCar()">Submit</button>
+
+  <script>
+    const { createClient } = supabase;
+    const supabaseUrl = "YOUR_SUPABASE_URL";
+    const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
+    const db = createClient(supabaseUrl, supabaseKey);
+
+    async function registerCar() {
+      const car_model = document.getElementById("car_model").value;
+      const car_number = document.getElementById("car_number").value;
+      const seats = document.getElementById("seats").value;
+      const { data: user } = await db.auth.getUser();
+      if (!user.user) { alert("Login first"); return; }
+      const { error } = await db.from("cars").insert([{ user_id: user.user.id, car_model, car_number, seats }]);
+      if (error) alert(error.message); else alert("Car Registered!");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Trip</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h2>Book Trip</h2>
+  <input type="number" id="seats" placeholder="Seats"><br>
+  <button onclick="bookSeat()">Book</button>
+
+  <script>
+    const { createClient } = supabase;
+    const supabaseUrl = "YOUR_SUPABASE_URL";
+    const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
+    const db = createClient(supabaseUrl, supabaseKey);
+    const tripId = new URLSearchParams(window.location.search).get("trip");
+
+    async function bookSeat() {
+      const { data: user } = await db.auth.getUser();
+      if (!user.user) { alert("Login first"); return; }
+      const seats = document.getElementById("seats").value;
+      const { error } = await db.from("bookings").insert([{ trip_id: tripId, user_id: user.user.id, seats_booked: seats }]);
+      if (error) alert(error.message); else alert("Booked! Contact owner.");
+    }
+  </script>
+</body>
+</html>

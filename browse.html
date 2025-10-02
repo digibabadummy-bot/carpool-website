@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Browse Trips</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h2>Trips</h2>
+  <div id="tripList"></div>
+
+  <script>
+    const { createClient } = supabase;
+    const supabaseUrl = "YOUR_SUPABASE_URL";
+    const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
+    const db = createClient(supabaseUrl, supabaseKey);
+
+    async function loadTrips() {
+      const { data, error } = await db.from("trips").select("*");
+      if (error) { alert(error.message); return; }
+      let html = "";
+      data.forEach(t => { html += `<div><b>${t.start_city} → ${t.end_city}</b><br>₹${t.price_per_seat}, Seats: ${t.seats_available}<br><a href="book.html?trip=${t.id}">Book</a><hr></div>`; });
+      document.getElementById("tripList").innerHTML = html;
+    }
+    loadTrips();
+  </script>
+</body>
+</html>

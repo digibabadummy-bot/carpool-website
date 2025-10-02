@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Trip</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h2>Add Trip</h2>
+  <input type="text" id="start_city" placeholder="Start City"><br>
+  <input type="text" id="end_city" placeholder="End City"><br>
+  <input type="number" id="price" placeholder="Price per Seat"><br>
+  <input type="number" id="seats" placeholder="Seats Available"><br>
+  <button onclick="addTrip()">Add</button>
+
+  <script>
+    const { createClient } = supabase;
+    const supabaseUrl = "YOUR_SUPABASE_URL";
+    const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
+    const db = createClient(supabaseUrl, supabaseKey);
+
+    async function addTrip() {
+      const start_city = document.getElementById("start_city").value;
+      const end_city = document.getElementById("end_city").value;
+      const price = document.getElementById("price").value;
+      const seats = document.getElementById("seats").value;
+      const { data: user } = await db.auth.getUser();
+      if (!user.user) { alert("Login first"); return; }
+      const { error } = await db.from("trips").insert([{ user_id: user.user.id, car_id: null, start_city, end_city, price_per_seat: price, seats_available: seats }]);
+      if (error) alert(error.message); else alert("Trip Added!");
+    }
+  </script>
+</body>
+</html>
