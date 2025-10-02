@@ -1,56 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login with Email</title>
+  <meta charset="UTF-8">
+  <title>Login with Email OTP</title>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
-<body>
-  <h2>Login with Email OTP</h2>
-
-  <!-- Email input -->
-  <input type="email" id="email" placeholder="Enter your email">
-  <button onclick="sendEmailOTP()">Send OTP</button>
-
+<body style="font-family: Arial; padding: 20px;">
+  <h2>Email OTP Login</h2>
+  
+  <!-- Input email -->
+  <input type="email" id="email" placeholder="Enter your email" style="padding:8px; width:250px;">
+  <button onclick="sendOTP()" style="padding:8px;">Send OTP</button>
+  
   <br><br>
-  <!-- OTP input -->
-  <input type="text" id="otp" placeholder="Enter OTP from Email">
-  <button onclick="verifyEmailOTP()">Verify OTP</button>
-
+  
+  <!-- Input OTP -->
+  <input type="text" id="otp" placeholder="Enter OTP here" style="padding:8px; width:250px;">
+  <button onclick="verifyOTP()" style="padding:8px;">Verify OTP</button>
+  
+  <p id="status" style="margin-top:20px; color:blue;"></p>
+  
   <script>
     const { createClient } = supabase;
-    const supabaseUrl = "https://abc123xyz.supabase.co";   // replace with your Supabase URL
-    const supabaseKey = "eyJhbGciOi...";                   // replace with your Supabase anon key
+    const supabaseUrl = "https://vupinegpbzhhadkgkpgv.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1cGluZWdwYnpoaGFka2drcGd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzODA0MTcsImV4cCI6MjA3NDk1NjQxN30.3wxZ1_wXcJ7bmMO8sGrkjK-n2RW3g3WhrVi1ESvzgHg";
     const db = createClient(supabaseUrl, supabaseKey);
 
     let emailValue = "";
 
-    // Step 1: Send OTP
-    async function sendEmailOTP() {
+    // Step 1 - Send OTP
+    async function sendOTP() {
       emailValue = document.getElementById("email").value;
-      const { data, error } = await db.auth.signInWithOtp({ email: emailValue });
-
+      document.getElementById("status").innerText = "Sending OTP...";
+      
+      const { error } = await db.auth.signInWithOtp({ email: emailValue });
+      
       if (error) {
-        alert("Error: " + error.message);
+        document.getElementById("status").innerText = "Error: " + error.message;
       } else {
-        alert("OTP sent to " + emailValue);
+        document.getElementById("status").innerText = "✅ OTP sent to " + emailValue;
       }
     }
 
-    // Step 2: Verify OTP
-    async function verifyEmailOTP() {
+    // Step 2 - Verify OTP
+    async function verifyOTP() {
       const token = document.getElementById("otp").value;
-
+      document.getElementById("status").innerText = "Verifying OTP...";
+      
       const { data, error } = await db.auth.verifyOtp({
         email: emailValue,
         token,
-        type: 'email'
+        type: "email"
       });
 
       if (error) {
-        alert("Error: " + error.message);
+        document.getElementById("status").innerText = "Error: " + error.message;
       } else {
-        alert("Logged in successfully!");
-        window.location.href = "profile.html";  // redirect to car registration
+        document.getElementById("status").innerText = "🎉 Login successful!";
+        console.log("User session:", data);
       }
     }
   </script>
